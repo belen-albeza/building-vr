@@ -1,0 +1,94 @@
+doctype html
+head
+    title An introduction to HTML5 game development
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
+
+    //- minideck core files
+    link(rel='stylesheet', href='minideck/minideck.css', type='text/css')
+    script(src='minideck/minideck.js')
+
+    //- remove these if you don't need syntax highlighting
+    script(src='minideck/vendor/highlight.js')
+    link(rel='stylesheet', href='minideck/vendor/highlight.css', type='text/css')
+
+    //- your own theme
+    link(rel='stylesheet', href='minideck/simple-theme.css', type='text/css')
+body
+    article#deck
+        header
+            progress
+        section.title
+            h1 Building VR experiences with A-Frame
+            p Belén Albeza
+            p
+                a(href='https://belenalbeza.com') belenalbeza.com
+                |&nbsp;//&nbsp;
+                a(href='https://twitter.com/ladybenko') @ladybenko
+            p.breathe Deck:<br>
+                a(href='https://belen-albeza.github.io/building-vr') https://belen-albeza.github.io/building-vr
+        section
+            h1 Why VR in the Web?
+            ul
+                li The power of an URL
+                li You can leverage your existing know-how
+        section
+            h1 Which browsers?
+            ul
+                li Firefox, Chrome, Samsung Internet
+                li Check the status at #[a(href="https://webvr.rocks/") webvr.rocks]
+                li Polyfill for mobile browsers (useful for Cardboard)
+        section
+            h1 Which headsets?
+            ul
+                li HTC Vive
+                li Oculus Rift
+                li TODO
+        section
+            h1 The WebVR API
+            ul
+                li It's an #[b standard] API (#[a(href="https://w3c.github.io/webvr/") spec at W3C])
+                li It doesn't #[em render], but provides the data to do it
+                li We can get:
+                    ul
+                        li Characteristics of the headset
+                        li The pose
+                        li The stage
+                        li VR controllers input
+        section
+            h1 Tools to author VR content
+            ul
+                li THREE.js
+                li Some game engines (Unity, PlayCanvas…)
+                li A-Frame!
+        section
+            h1 A-Frame
+            ul
+                li: a(href="https://aframe.io") aframe.io
+                li It's a WebVR framework that simplifies #[i a lot] creating VR experiences
+                li Created at Mozilla, open-source
+        section
+            h1 Creating a VR scene is easy…
+            pre: code.language-html.
+                &lt;a-scene&gt;
+                    &lt;a-sphere radius="1" position="0 1 -4" color="#ff0040"&gt;
+                    &lt;/a-sphere&gt;
+
+                    &lt;a-plane rotation="-90 0 0" position="0 0 -5" width="10"
+                        height="10" color="#fff"&gt;
+                    &lt;/a-plane&gt;
+
+                    &lt;a-sky color="#eee">&lt;/a-sky&gt;
+                &lt;/a-scene&gt;
+        section
+            iframe.demo(src="demos/basic_scene.html")
+
+
+    script.
+        document.addEventListener('DOMContentLoaded', function () {
+            let deck = new MiniDeck(
+                document.querySelectorAll('#deck > section'),
+                document.querySelector('#deck progress'));
+        });
+
+        if (hljs) { hljs.initHighlightingOnLoad();  }
