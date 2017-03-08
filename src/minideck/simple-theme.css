@@ -67,7 +67,17 @@ iframe.demo {
     margin-top: 0;
 }
 
+.bg-aframe {
+    background-color: rgb(36, 202, 255);
+    background-image: url(../images/aframe_logo.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+}
 
+.bg-aframe ul {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 0.5em 2em;
+}
 
 /*
 slides
