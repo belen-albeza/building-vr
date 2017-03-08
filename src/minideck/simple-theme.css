@@ -31,6 +31,10 @@ iframe.demo {
     max-width: 100%;
 }
 
+.center {
+    text-align: center;
+}
+
 .solid-bg {
     background: #000;
 }

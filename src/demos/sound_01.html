@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="vendor/aframe.js"></script>
+</head>
+<body>
+    <a-scene>
+        <!-- camera, controlled by headset -->
+        <a-camera position="0 1 0"></a-camera>
+        <!-- the ground: it will be a semi transparent circle -->
+        <a-circle rotation="-90 0 0" radius="10" color="#fff" transparent opacity="0.5"></a-circle>
+        <!-- the sky: red, temporarily -->
+        <a-sky color="red"></a-sky>
+    </a-scene>
+</body>

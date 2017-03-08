@@ -82,7 +82,244 @@ body
                 &lt;/a-scene&gt;
         section
             iframe.demo(src="demos/basic_scene.html")
+        section
+            h1 Advantages of this approach
+            ul
+                li It's in the #[b DOM]! #[code querySelector], etc. work!
+                li You can manipulate the scene with JS by adding, removing and modifying these DOM elements
+                li You can use existing tools and frameworks (such as a template library)
+        section
+            h1 Which primitives we have?
+            ul
+                li 3D primitives: #[code a-sphere], #[code a-box], #[code a-torus]…
+                li Images and video: #[code a-video], #[code a-videosphere], #[a-image]…
+                li Other: #[code a-gltf], #[code a-text], #[code a-light], #[code a-sound]…
+        section
+            h1 The ECS pattern
+            ul
+                li Entity-Component-System
+                li Favors compoistion over inheritance
+                li Entities (#[code a-entity], #[code a-box]…): barebones structure
+                li Component (#[code position], #[code color]…): attached to entities
+                li System: handles business logic of components
+        section
+            h1 A-Painter
+            p.center VR drawing app
+            iframe.figure(width="560", height="315", src="https://www.youtube.com/embed/DpWOKikos7Q")
+        section
+            h1 A-Blast
+            p.center Arcade game
+            img.figure(src='images/a-blast.gif')
+        section
+            h1 Let's make a demo!
+            ul
+                li It leverages A-Frame's entity-component-system
+                li It uses A-Frame's asset manager
+                li It synthesizes chords with the Web Audio API
+                li It uses positional audio
+        section
+            h1 Step 1: The barebones
+            ul
+                li We are creating the basic, static elements of the scene
+                li We are setting the sky to be (temporarily) red
+        section
+            pre: code.language-html.
+                &lt;a-scene&gt;
+                    &lt;a-camera position="0 1 0"&gt;&lt;/a-camera&gt;
 
+                    &lt;a-circle rotation="-90 0 0" radius="10" color="#fff"
+                        transparent opacity="0.5"&gt;&lt;/a-circle&gt;
+
+                    &lt;a-sky color="red"&gt;&lt;/a-sky&gt;
+                &lt;/a-scene&gt;
+        section
+            iframe.demo(src='demos/sound_01.html')
+        section
+            h1 Step 2: the asset manager
+            ul
+                li A-Frame incorporates an asset manager so it loads images, audio files, models, etc.
+                li We don't need to listen to #[code load] events, etc.
+                li Use #[code a-assets]
+                li We are going to use an image in the sky
+        section
+            pre: code.language-html.
+                &lt;a-scene&gt;
+                    &lt;a-assets&gt;
+                        &lt;img id="city" src="city.jpg"&gt;
+                    &lt;/a-assets&gt;
+
+                    &lt;!-- ... --&gt;
+
+                    &lt;a-sky src="#city"&gt;&lt;/a-sky&gt;
+                &lt;/a-scene&gt;
+        section
+            iframe.demo(src='demos/sound_02.html')
+
+        section
+            h1 Step 3: Create the pillars procedurally
+            ul
+                li Why? DRY and we don't need to manually calculate positions
+                li We can just use the standard API's to manipulate the DOM
+                li #[code Document.createElement], #[code Element.appendChild], #[code Element.setAttribute]…
+                li We will create #[code a-cylinder] instances and attach them to the scene
+        section
+            pre: code.language-js.
+                const PILLARS = [
+                    { color: 'rgb(253, 162, 40)' },
+                    { color: 'rgb(254, 229, 65)' },
+                    { color: 'rgb(35, 224, 64)' },
+                    // ...
+                ];
+
+        section
+            pre: code.language-js.
+                const RADIUS = 5;
+
+                PILLARS.forEach(function (p, index, arr) {
+                    let angle = index * (2 * Math.PI / arr.length);
+                    let x = Math.cos(angle) * RADIUS;
+                    let z = Math.sin(angle) * RADIUS;
+
+                    let el = document.createElement('a-cylinder');
+                    el.setAttribute('position', `${x} 0 ${z}`);
+                    el.setAttribute('color', p.color);
+
+                    document.querySelector('a-scene').appendChild(el);
+                });
+        section
+            iframe.demo(src='demos/sound_03.html')
+        section
+            h1 Step 4: Create a component
+            ul
+                li For now it will animate the entity by nesting an #[code a-animation]
+                    br
+                    |
+                    small (later on it will play a chord)
+                li The component will hold the #[b data] to operate
+                li The system will provide the #[b behaviour]
+        section
+            pre: code.language-js.
+                AFRAME.registerComponent('pipe', {
+                    schema: {
+                        chord: { type: 'string', default: 'C4' },
+                        dur: { type: 'number', default: 2000 }
+                    },
+                    init: function () {
+                        this.el.appendChild(this.system.createAnimation(this.data));
+                    },
+                });
+        section
+            pre: code.language-js.
+                AFRAME.registerSystem('pipe', {
+                    createAnimation: function (data) {
+                        let anim = document.createElement('a-animation');
+
+                        anim.setAttribute('attribute', 'scale');
+                        anim.setAttribute('dur', data.dur / 3);
+                        anim.setAttribute('from', '1 1 1');
+                        // more attribute setup here
+                        // ...
+
+                        return anim;
+                    }
+                });
+        section
+            pre: code.language-js.
+                const PILLARS = [
+                    { chord: 'C4', color: 'rgb(253, 162, 40)', dur: 2500 },
+                    // ...
+                ];
+
+                PILLARS.forEach(function (p, index, arr) {
+                    // ...
+                    // ex: &lt;a-cylinder pipe="chord: C4; dur: 2500"&gt;
+                    el.setAttribute('pipe', `chord: ${p.chord};
+                        ${p.dur ? 'dur: ' + p.dur : '' }`);
+                    // ...
+                });
+
+        section
+            iframe.demo(src='demos/sound_04.html')
+        section
+            h1 Step 5: play sounds
+            ul
+                li We have an audio synth created with Web Audio
+                li It can play major chords (3 notes at the same time)
+                li A note is a wave with a given frequency (ex: A4 is 440 Hz)
+                li It can handle positional audio
+        section
+            pre: code.language-js.
+                AFRAME.registerSystem('pipe', {
+                    init: function () {
+                        this.ctx = new AudioContext();
+                        this.instrument = new Instrument(this.ctx);
+                    },
+                    // ...
+                };
+        section
+            pre: code.language-js.
+                AFRAME.registerSystem('pipe', {
+                    // ...
+                    playChord: function (entity) {
+                        let data = entity.components.pipe.data;
+
+                        let position = entity.getAttribute('position');
+                        let rotY = // ... camera rotation
+                        let orientation = // ... orientation to camera
+
+                        this.instrument.playChord(data.chord, data.dur / 1000,
+                            position, orientation);
+
+                        entity.emit('sound');
+                    },
+                    //...
+                };
+        section
+            h1 Final step: orchestrate!
+            ul
+                li Systems have a #[code tick] callback, which is executed every frame
+                li We will use it to select a random pillar and play it, once the previous note has finished
+                li The system now needs to track every existing component
+        section
+            pre: code.language-js.
+                AFRAME.registerSystem('pipe', {
+                    init: function () {
+                        this.entities = [];
+                        // ...
+                    },
+                    subscribe: function (el) {
+                        this.entities.push(el);
+                    },
+                    unsubscribe: function (el) {
+                        let index = this.entities.indexOf(el);
+                        this.entities.splice(index, 1);
+                    },
+                    // ...
+                };
+        section
+            pre: code.language-js.
+                AFRAME.registerSystem('pipe', {
+                    // ...
+                    tick: function () {
+                        let timestamp = this.ctx.currentTime;
+
+                        if (timestamp - this.lastNoteTime > this.lastNoteDuration) {
+                            let entity = this.entities[
+                                Math.floor(Math.random() * this.entities.length)];
+
+                            this.lastNoteDuration = this.playChord(entity);
+                            this.lastNoteTime = timestamp;
+                        }
+                    },
+                    // ...
+                };
+        section
+            iframe.demo(src='demos/index.html')
+        section
+            h1 Try A-Frame yourself!
+            ul
+                li Get started at #[a(href='http://aframe.io') aframe.io]
+                li Mozilla's A-Frame codepens #[a(href='http://codepen.io/mozvr/') codepen.io/mozvr]
 
     script.
         document.addEventListener('DOMContentLoaded', function () {
